@@ -9,7 +9,7 @@ site-twitter: #if your site has a twitter account, enter it here
 # Author Settings
 author: Donal Tuohy # add your name
 author-img: donal-tuohy.png # add your photo
-about-author: Software Engineer at Evervault. Always hungry to keep learning. # add description
+about-author: Software Engineer at Evervault.
 social-github: donaltuohy # add your Github handle
 social-linkedin: donaltuohy
 social-email: donaltuohy@gmail.com
