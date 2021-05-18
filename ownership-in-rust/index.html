@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Ownership in Rust - Donal Tuohy</title>
+
+  <!-- Edit site and author settings in `_config.yml` to make the social details your own -->
+
+    <meta content="Donal Tuohy" property="og:site_name">
+  
+    <meta content="Ownership in Rust" property="og:title">
+  
+  
+    <meta content="article" property="og:type">
+  
+  
+    <meta content="Learning about memory usage in Rust." property="og:description">
+  
+  
+    <meta content="http://donaltuohy.com/ownership-in-rust/" property="og:url">
+  
+  
+    <meta content="2021-05-18T04:44:20+00:00" property="article:published_time">
+    <meta content="http://donaltuohy.com/about/" property="article:author">
+  
+  <meta content="http://donaltuohy.com/assets/img/donal-tuohy.png" property="og:image">
+  
+    
+  
+  
+    
+    <meta content="Rust" property="article:tag">
+    
+    <meta content="Ownership" property="article:tag">
+    
+    <meta content="Memory" property="article:tag">
+    
+  
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@">
+    <meta name="twitter:creator" content="@">
+  
+    <meta name="twitter:title" content="Ownership in Rust">
+  
+  
+    <meta name="twitter:url" content="http://donaltuohy.com/ownership-in-rust/">
+  
+  
+    <meta name="twitter:description" content="Learning about memory usage in Rust.">
+  
+  
+    <meta name="twitter:image:src" content="http://donaltuohy.com/assets/img/cpu1.jpg">
+  
+
+	<meta name="description" content="Learning about memory usage in Rust.">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/assets/img/favicon/apple-touch-icon.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#263959">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#263959">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#263959">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=PT+Serif:400,700|Lato:300,400,700&display=swap" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <aside class="sidebar">
+  <header>
+    <div class="about">
+      <div class="cover-author-image">
+        <a href="/"><img src="/assets/img/donal-tuohy.png" alt="Donal Tuohy"></a>
+      </div>
+      <div class="author-name">Donal Tuohy</div>
+      <p>Software Engineer at Evervault.</p>
+    </div>
+  </header> <!-- End Header -->
+  <footer>
+    <section class="contact">
+      <h3 class="contact-title">Contact me</h3>
+      <ul>
+        <li class="cv"><a href="cv" target="_blank"><i class="fa fa-file"></i></a></li>
+        
+          <li class="github"><a href="http://github.com/donaltuohy" target="_blank"><i class="fa fa-github"></i></a></li>
+        
+        
+          <li class="linkedin"><a href="https://in.linkedin.com/in/donaltuohy" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+        
+        
+          <li class="email"><a href="mailto:donaltuohy@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+        
+      </ul>
+    </section> <!-- End Section Contact -->
+    <div class="copyright">
+      <p>2021 &copy; Donal Tuohy</p>
+    </div>
+  </footer> <!-- End Footer -->
+</aside> <!-- End Sidebar -->
+<div class="content-box clearfix">
+  <article class="article-page">
+  <div class="page-content">
+    
+    <div class="page-cover-image">
+      <figure>
+        <img class="page-image" src=/assets/img/cpu1.jpg alt="Ownership in Rust">
+        
+      </figure>
+    </div> <!-- End Page Cover Image -->
+    
+    <div class="wrap-content">
+      <header class="header-page">
+        <h1 class="page-title">Ownership in Rust</h1>
+        <div class="page-date"><span>2021, May 18&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+      </header>
+      <p>I’ve started learning Rust recently. The first topic that has differed from other Languages I am familiar with is how Rust deals with memory usage. Rust is able to guarantee memory safety without needing a garbage collector. This is possible with a feature called <em>Ownership</em>.</p>
+
+<h3 id="scope-of-a-variable">Scope of a variable</h3>
+<p>When we talk about the scope of a variable, it is the range within the program for which a variable is valid. Imagine we have a variable like this :</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="s">"hello"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>This variable is valid until it’s scope ends.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// s is not valid until as it hasn't been defined yet.</span>
+
+<span class="p">{</span> 
+    <span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="s">"hello"</span><span class="p">;</span> <span class="c">// s is valid from here</span>
+
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span> <span class="c">// s can be used as it's still in scope</span>
+<span class="p">}</span> 
+
+<span class="c">// s is now unusable as the scope it was defined in is over.</span>
+
+</code></pre></div></div>
+
+<h3 id="memory-and-allocation">Memory and Allocation</h3>
+<p>When we’re looking to allocate memory for <em>mutable variables</em>, we have the problem that the amount of memory needed is unknown at compile time. We need to do two things:</p>
+
+<ol>
+  <li>We must request the memory from the operating system at runtime.</li>
+  <li>Once we are finished with the variable, we must return the memory to the operating system. Otherwise we would start wasting memory.</li>
+</ol>
+
+<p>The first step is pretty automatic and seemless in most programming languages. For the second part however, there’s multiple ways this is dealt with. 
+In languages with a Garbage Collector, it is looked after and you don’t need to think about it. When a language doesn’t have a Garbage Collector,
+it is up to the programmer to return the memory explicitly.</p>
+
+<p>This is where scopes come into play in Rust. Memory is automatically returned once the variable that was using it goes out of scope. If we look at the the code snipped above, when the block is closed with a curly bracket, the variable <code class="language-plaintext highlighter-rouge">s</code> goes out of scope. When a scope ends in Rust, a special function, <code class="language-plaintext highlighter-rouge">drop</code>, is called. This function returns the memory of any variables that were in the scope.</p>
+
+<p><img src="/assets/img/sunset.jpg" alt="Ownership" /></p>
+
+
+      <div class="page-footer">
+        <div class="page-share">
+          <a href="https://twitter.com/intent/tweet?text=Ownership in Rust&url=http://donaltuohy.com/ownership-in-rust/" title="Share on Twitter" rel="nofollow" target="_blank">Twitter</a>
+          <a href="https://facebook.com/sharer.php?u=http://donaltuohy.com/ownership-in-rust/" title="Share on Facebook" rel="nofollow" target="_blank">Facebook</a>
+          <a href="https://plus.google.com/share?url=http://donaltuohy.com/ownership-in-rust/" title="Share on Google+" rel="nofollow" target="_blank">Google+</a>
+        </div>
+        <div class="page-tag">
+          
+            <a href="/tags#Rust" class="tag">&#35; Rust</a>
+          
+            <a href="/tags#Ownership" class="tag">&#35; Ownership</a>
+          
+            <a href="/tags#Memory" class="tag">&#35; Memory</a>
+          
+        </div>
+      </div>
+    </div> <!-- End Wrap Content -->
+  </div> <!-- End Page Content -->
+</article> <!-- End Article Page -->
+
+</div>
+
+  </div>
+  
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
+
+</body>
+</html>
